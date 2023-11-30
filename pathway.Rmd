@@ -1,0 +1,99 @@
+---
+title: "Untitled"
+author: "AZMI"
+date: "2023-06-08"
+output: html_document
+---
+```{r}
+setwd("C:/Users/shiha/OneDrive/Desktop/Azmi Bioinf/MSC Project/normalisedcounts/MEV")
+getwd()
+```
+```{r}
+df = read.csv("NP_MEVHIGHANDLOWNEW.csv")
+df 
+```
+
+```{r}
+library(biomaRt)
+```
+
+```{r}
+mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
+```
+
+```{r}
+NP <- getBM(filters = 'ensembl_gene_id',
+            attributes = c('ensembl_gene_id',"entrezgene_id",'hgnc_symbol',
+                           'description','gene_biotype'),
+            values = df['ENSEMBL.ID'], mart=mart, uniqueRows = TRUE)
+NP
+```
+```{r}
+write.csv(NP, "GENELIST.CSV")
+```
+
+```{r}
+library(enrichR)
+```
+
+```{r}
+library(ggrepel)
+```
+
+```{r}
+library(msigdbr)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+BiocManager::install("DOSE")
+```
+
+```{r}
+library(DOSE)
+```
+
+```{r}
+library(ggrepel)
+```
+
+```{r}
+myGene = NP$hgnc_symbol
+head(myGene)
+```
+
+
+```{r}
+setEnrichrSite("Enrichr")
+websiteLive <- TRUE
+```
+
+```{r}
+mydbs = c("KEGG_2021_Human", "GO_Cellular_Component_2023","GO_Biological_Process_2023")
+```
+
+```{r}
+if(websiteLive) {
+  enriched <- enrichr(myGene, mydbs)
+}
+```
+```{r}
+Np_Pathtable = if (websiteLive) enriched[["KEGG_2021_Human"]]
+```
+
+```{r}
+Np_Pathtable = as.data.frame(Np_Pathtable)
+```
+```{r}
+Np_Pathtable = if (websiteLive) enriched[["GO_Cellular_Component_2023"]]
+```
+
+```{r}
+plotEnrich(enriched[[2]], showTerms = 10, numChar = 20,y = "Count", orderBy = "P.value")
+```
+
+ 
+
